@@ -88,7 +88,15 @@ students.post('/', (req, res, next) => {
 })
 
 students.put('/:id', (req, res, next) => {
-    res.status(200).send(`${req.params.id}`);
+    const index = req.params.id;
+    const result = studentsArray.find( student => student.id === parseInt(index));
+    const updateStudent = req.query;
+    if(result) {
+        studentsArray[result] = updateStudent;
+        res.status(200).send(updateStudent);
+    } else {
+        res.status(404).send("Campus not found!");
+    }
 });
 
 students.delete('/:id', (req, res, next) => {

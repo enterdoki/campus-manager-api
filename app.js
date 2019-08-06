@@ -3,8 +3,8 @@ const students = require('./routes/students');
 const campuses = require('./routes/campuses');
 const app = express();
 
-app.use('/students', students);
-app.use('/campuses', campuses);
+app.use('/api/students', students);
+app.use('/api/campuses', campuses);
 
 app.get('/', (req, res, next) => {
     console.log('got request for hello world');
