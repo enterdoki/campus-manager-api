@@ -88,7 +88,7 @@ students.post('/', (req, res, next) => {
 })
 
 students.put('/:id', (req, res, next) => {
-    
+    res.status(200).send(`${req.params.id}`);
 });
 
 students.delete('/:id', (req, res, next) => {
