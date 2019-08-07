@@ -104,7 +104,7 @@ campuses.delete('/:id', (req, res, next) => {
     const deleteCampus = campusesArray.find( campus => campus.id == parseInt(index));
     if(deleteCampus) {
         campusesArray.splice(deleteCampus,1);
-        res.status(200).send("Campus deleted!");
+        res.status(200).send(campusesArray);
     } else {
         res.status(400).send("Bad Request");
     }
