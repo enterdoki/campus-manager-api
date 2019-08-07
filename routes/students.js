@@ -63,7 +63,7 @@ const studentsArray = [
     ]
 
 /*
-Get /api/students gets all students
+GET /api/students gets all students
 */
 students.get('/', (req, res, next) => {
     console.log('got request for hello world');
@@ -71,7 +71,7 @@ students.get('/', (req, res, next) => {
 })
 
 /*
-Get /api/students/:id gets student with specific id
+GET /api/students/:id gets student with specific id
 */
 students.get('/:id', (req, res, next) => {
     const index = req.params.id;
@@ -115,7 +115,7 @@ students.put('/:id', (req, res, next) => {
 });
 
 /*
-Delete /api/students/:id Deletes student with specific id
+DELETE /api/students/:id Deletes student with specific id
 */
 students.delete('/:id', (req, res, next) => {
     const index = req.params.id;

@@ -44,23 +44,33 @@ const campusesArray = [
     ]
 
 
+/*
+GET /api/campuses/:id gets all campuses
+*/
 campuses.get('/', (req, res, next) => {
     console.log('got request for hello world');
     res.status(200).send(campusesArray);
 })
 
+/*
+GET /api/campuses/:id gets campus with specific id
+*/
 campuses.get('/:id', (req, res, next) => {
     const index = req.params.id;
     const result = campusesArray.find( campus => campus.id === parseInt(index));
     if(result) {
         res.status(200).send(result);
     } else {
-        res.status(404).send('Not found');
+        res.status(404).send("Campus not found!");
     }
 })
 
+
+/*
+POST /api/campuses appends new campus
+*/
 campuses.post('/', (req, res, next) => {
-    const newCampus = req.query;
+    const newCampus = req.body;
     if(newCampus) {
         campusesArray.push(newCampus);
         res.status(200).send(newCampus);
@@ -69,24 +79,32 @@ campuses.post('/', (req, res, next) => {
     }
 })
 
+/*
+PUT /api/campuses/:id updates campus with specific id
+------
+Temp fix -> deleting position and inserting new value
+*/
 campuses.put('/:id', (req, res, next) => {
     const index = req.params.id;
     const result = campusesArray.find( campus => campus.id === parseInt(index));
-    const updateCampus = req.query;
+    const updateCampus = req.body;
     if(result) {
-        campusesArray[result] = updateCampus;
-        res.status(200).send(updateCampus);
+        campusesArray.splice(result,1,updateCampus);
+        res.status(200).send(campusesArray);
     } else {
         res.status(404).send("Campus not found!");
     }
 });
 
+/*
+DELETE /api/campuses/:id Deletes campus with specific id
+*/
 campuses.delete('/:id', (req, res, next) => {
     const index = req.params.id;
     const deleteCampus = campusesArray.find( campus => campus.id == parseInt(index));
     if(deleteCampus) {
         campusesArray.splice(deleteCampus,1);
-        res.status(200).send("Student deleted!");
+        res.status(200).send("Campus deleted!");
     } else {
         res.status(400).send("Bad Request");
     }
