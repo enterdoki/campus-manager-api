@@ -11,6 +11,6 @@ app.get('/', (req, res, next) => {
     res.status(200).send('Hello World, default route!');
 })
 
-app.listen(3000, () => {
-    console.log('Example app is listening on port 3000');
+app.listen(3001, () => {
+    console.log('Example app is listening on port 3001');
 });
