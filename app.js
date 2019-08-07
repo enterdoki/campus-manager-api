@@ -6,11 +6,13 @@ const app = express();
 app.use('/api/students', students);
 app.use('/api/campuses', campuses);
 
+var port = process.env.PORT || 3000;
+
 app.get('/', (req, res, next) => {
     console.log('got request for hello world');
     res.status(200).send('Hello World, default route!');
 })
 
-app.listen(3001, () => {
-    console.log('Example app is listening on port 3001');
+app.listen(port, () => {
+    console.log('Example app is listening on http://localhost:' + port);
 });
