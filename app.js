@@ -1,10 +1,11 @@
 const express = require('express');
 const students = require('./routes/students');
 const campuses = require('./routes/campuses');
+const api = "https://campus-manager-api-0.herokuapp.com/";
 const app = express();
 
-app.use('/api/students', students);
-app.use('/api/campuses', campuses);
+app.use(`/${api}/students`, students);
+app.use(`/${api}/campuses`, campuses);
 
 var port = process.env.PORT || 3000;
 
