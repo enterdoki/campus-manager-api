@@ -88,6 +88,7 @@ campuses.put('/:id', (req, res, next) => {
     const index = req.params.id;
     const result = campusesArray.find( campus => campus.id === parseInt(index));
     const updateCampus = req.body;
+    console.log(result)
     if(result) {
         campusesArray.splice(result,1,updateCampus);
         res.status(200).send(campusesArray);
