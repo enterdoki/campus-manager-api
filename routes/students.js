@@ -62,43 +62,61 @@ const studentsArray = [
     }
     ]
 
+/*
+Get /api/students gets all students
+*/
 students.get('/', (req, res, next) => {
     console.log('got request for hello world');
     res.status(200).send(studentsArray);
 })
 
+/*
+Get /api/students/:id gets student with specific id
+*/
 students.get('/:id', (req, res, next) => {
     const index = req.params.id;
     const result = studentsArray.find( student => student.id === parseInt(index));
     if(result) {
         res.status(200).send(result);
     } else {
-        res.status(404).send('Not found');
+        res.status(404).send("Student not found!");
     }
 })
 
+/*
+POST /api/students Creates new student
+*/
 students.post('/', (req, res, next) => {
-    const newStudent = req.query;
+    const newStudent = req.body;
     if(newStudent) {
         studentsArray.push(newStudent);
-        res.status(200).send(newStudent);
+        res.status(200).send(studentsArray);
     } else {
         res.status(400).send("Bad Request");
     }
 })
 
+/*
+PUT /api/students/:id updates student
+------
+Temp fix -> deleting position and inserting new value
+*/
 students.put('/:id', (req, res, next) => {
     const index = req.params.id;
     const result = studentsArray.find( student => student.id === parseInt(index));
-    const updateStudent = req.query;
+    const updateStudent = req.body;
     if(result) {
-        studentsArray[result] = updateStudent;
-        res.status(200).send(updateStudent);
+       // studentsArray[result] = updateStudent;
+        studentsArray.splice(result,1,updateStudent);
+        res.status(200).send(studentsArray);
     } else {
-        res.status(404).send("Campus not found!");
+        res.status(400).send("Student not found!");
     }
 });
 
+/*
+Delete /api/students/:id Deletes student with specific id
+*/
 students.delete('/:id', (req, res, next) => {
     const index = req.params.id;
     const deleteStudent = studentsArray.find( student => student.id == parseInt(index));
