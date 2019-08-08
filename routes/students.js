@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
 const { Campus, Student } = require("../database/models");
-
+const db = require('../database/db')
 /*
 GET /api/students gets all students
 */
