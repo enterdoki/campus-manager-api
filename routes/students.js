@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
 const db = require('../database/db')
+const cors = require('cors')
+students.use(cors())
 
 /*
 Get /api/students gets all students
