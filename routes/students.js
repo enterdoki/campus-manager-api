@@ -1,132 +1,110 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const students = express.Router();
-
 students.use(bodyParser.json());
-
-const studentsArray = [
-    {
-    "id": 4,
-    "firstName": "Jerry",
-    "lastName": "Jingle",
-    "email": "jerryjingle@bells.com",
-    "imageUrl": "http://i.imgur.com/AItCxSs.jpg",
-    "gpa": null,
-    "createdAt": "2018-12-06T19:58:21.314Z",
-    "updatedAt": "2018-12-06T19:58:21.314Z",
-    "campusId": 3
-    },
-    {
-    "id": 6,
-    "firstName": "Barry",
-    "lastName": "Huang",
-    "email": "someemailgoeshere@yahoo.com",
-    "imageUrl": "http://i.imgur.com/AItCxSs.jpg",
-    "gpa": null,
-    "createdAt": "2018-12-06T20:04:04.275Z",
-    "updatedAt": "2018-12-06T20:04:04.275Z",
-    "campusId": 1
-    },
-    {
-    "id": 1,
-    "firstName": "justin",
-    "lastName": "mintzer",
-    "email": "mintzer.justin@gmail.com",
-    "imageUrl": "https://i.imgur.com/N9Koe2G.jpg",
-    "gpa": 4,
-    "createdAt": "2018-12-05T23:02:45.257Z",
-    "updatedAt": "2018-12-05T23:02:45.257Z",
-    "campusId": 1
-    },
-    {
-    "id": 24,
-    "firstName": "first",
-    "lastName": "LAST",
-    "email": "email@email.com",
-    "imageUrl": "http://i.imgur.com/AItCxSs.jpg",
-    "gpa": null,
-    "createdAt": "2018-12-10T04:50:33.677Z",
-    "updatedAt": "2018-12-10T04:50:33.677Z",
-    "campusId": null
-    },
-    {
-    "id": 2,
-    "firstName": "bob",
-    "lastName": "jones",
-    "email": "bobbyboy1234@yahoo.com",
-    "imageUrl": "https://i.imgur.com/GuAB8OE.jpg",
-    "gpa": 3.7,
-    "createdAt": "2018-12-05T23:02:45.270Z",
-    "updatedAt": "2019-06-14T00:15:35.429Z",
-    "campusId": 1
-    }
-    ]
+const db = require('../database/db')
 
 /*
 Get /api/students gets all students
 */
-students.get('/', (req, res, next) => {
-    console.log('got request for hello world');
-    res.status(200).send(studentsArray);
+students.get('/', async(req, res, next) => {
+    try {
+        const data = await db.query("SELECT * FROM students" );
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
+    }
 })
-
 /*
 Get /api/students/:id gets student with specific id
 */
-students.get('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = studentsArray.find( student => student.id === parseInt(index));
-    if(result) {
-        res.status(200).send(result);
-    } else {
-        res.status(404).send("Student not found!");
+students.get('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM students WHERE id = ${student_id}`)
+        if(Object.keys(data[0]).length !==0) {  // Found student
+            res.status(200).json(data[0]);
+        } 
+        if(Object.keys(data[0]).length===0) {   // Not found
+            res.status(200).send("Student not found, try again!");
+        }
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+/*
+Get /api/students/:id/campus gets a specific student's campus information
+*/
+students.get('/:id/campus', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId =                                      campuses.id WHERE students.id = ${student_id}`);
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 
 /*
 POST /api/students Creates new student
 */
-students.post('/', (req, res, next) => {
-    const newStudent = req.body;
-    if(newStudent) {
-        studentsArray.push(newStudent);
-        res.status(200).send(studentsArray);
-    } else {
-        res.status(400).send("Bad Request");
+students.post('/', async(req, res, next) => {
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+    const gpa = req.body.gpa
+    const campusId = req.body.campusId
+    const imgUrl = req.body.imgUrl
+    
+    try {
+        if(!imgUrl) {   // No image
+            await db.query(`INSERT INTO students 
+                        VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId})`)
+        } 
+        if(imgUrl) {    // User appended image link
+            await db.query(`INSERT INTO students 
+                            VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId}, '${imgUrl}')`)
+        }
+        console.log("Successfully added.")
+        res.status(204).send("Success");
+    } catch (err) {
+        res.status(400).send(err);
     }
-})
+});
 
 /*
 PUT /api/students/:id updates student
-------
-Temp fix -> deleting position and inserting new value
 */
-students.put('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = studentsArray.find( student => student.id === parseInt(index));
-    const updateStudent = req.body;
-    if(result) {
-       // studentsArray[result] = updateStudent;
-        studentsArray.splice(result,1,updateStudent);
-        res.status(200).send(studentsArray);
-    } else {
-        res.status(400).send("Student not found!");
+students.put('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+    const gpa = req.body.gpa
+    const campusId = req.body.campusId
+    const imgUrl = req.body.imgUrl
+    try {
+        await db.query(`UPDATE students 
+                        SET firstname = '${firstName}', lastname = '${lastName}' ,email = '${email}',gpa = ${gpa}, campusId = ${campusId}, imgUrl = '${imgUrl}'
+                        WHERE id = ${student_id}`)
+        res.status(200).send("Successfully updated!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
 
 /*
 Delete /api/students/:id Deletes student with specific id
 */
-students.delete('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const deleteStudent = studentsArray.find( student => student.id == parseInt(index));
-    if(deleteStudent) {
-        studentsArray.splice(deleteStudent,1);
-        res.status(200).send("Student deleted!");
-    } else {
-        res.status(400).send("Bad Request");
+students.delete('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        await db.query(`DELETE FROM students WHERE id = ${student_id}`)
+        res.status(200).send("Successfully deleted!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
-
 
 module.exports = students;

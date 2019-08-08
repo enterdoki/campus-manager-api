@@ -1,96 +1,111 @@
 const express = require('express');
 const campuses = express.Router();
 const bodyParser = require('body-parser')
-
+const db = require('../database/db')
+const cors = require('cors')
+campuses.use(cors())
 campuses.use(bodyParser.json());
 
-const campusesArray = [
-    {
-    "id": 1,
-    "name": "FullStack Academy",
-    "imgUrl": "https://www.fullstackacademy.com/images/fa-logo.png",
-    "address": "5 Hanover Sq",
-    "description": "Fullstack Academy is an immersive software engineering coding bootcamp located in New York City and Chicago. Students of the full-time flagship course learn full stack JavaScript over the course of a 13-week, on-campus program.",
-    "createdAt": "2018-12-05T23:02:45.290Z",
-    "updatedAt": "2018-12-05T23:02:45.290Z"
-    },
-    {
-    "id": 2,
-    "name": "Nassau Community College",
-    "imgUrl": "https://nccapps.ncc.edu/forms/ComplaintForm/logo.png",
-    "address": " 1 Education Dr, Garden City, NY 11530",
-    "description": "Nassau Community College is a two-year college located in East Garden City, New York, USA. The school is in Nassau County on Long Island. NCC maintains a nationwide reputation for ease of transferability to four-year institutions.",
-    "createdAt": "2018-12-05T23:02:45.299Z",
-    "updatedAt": "2018-12-05T23:02:45.299Z"
-    },
-    {
-    "id": 5,
-    "name": "Harvard",
-    "imgUrl": "https://upload.wikimedia.org/wikipedia/en/0/02/Harvard_shield-College.png",
-    "address": "86 Brattle Street Cambridge, MA 02138",
-    "description": "Harvard College is the undergraduate liberal arts college of Harvard University. Founded in 1636 in Cambridge, Massachusetts, it is the oldest institution of higher learning in the United States and one of the most prestigious in the world.",
-    "createdAt": "2018-12-06T17:39:33.705Z",
-    "updatedAt": "2018-12-06T17:39:33.705Z"
-    },
-    {
-    "id": 3,
-    "name": "Brown University",
-    "imgUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/3/31/Brown_University_coat_of_arms.svg/130px-Brown_University_coat_of_arms.svg.png",
-    "address": "Providence, RI 02912",
-    "description": "Brown University is a private Ivy League research university in Providence, Rhode Island. Founded in 1764 as the College in the English Colony of Rhode Island and Providence Plantations, it is the seventh-oldest institution of higher education in the U.S. and one of the nine colonial colleges chartered before the American Revolution.",
-    "createdAt": "2018-12-05T23:02:45.306Z",
-    "updatedAt": "2018-12-05T23:02:45.306Z"
-    }
-    ]
+// Find all students from school
+//SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id ORDER BY campuses.name ASC
 
-
-campuses.get('/', (req, res, next) => {
-    console.log('got request for hello world');
-    res.status(200).send(campusesArray);
-})
-
-campuses.get('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = campusesArray.find( campus => campus.id === parseInt(index));
-    if(result) {
-        res.status(200).send(result);
-    } else {
-        res.status(404).send('Not found');
+/*
+Get /api/campuses gets all campuses
+*/
+campuses.get('/', async(req, res, next) => {
+    try {
+        const data = await db.query("SELECT * FROM campuses");
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 
-campuses.post('/', (req, res, next) => {
-    const newCampus = req.query;
-    if(newCampus) {
-        campusesArray.push(newCampus);
-        res.status(200).send(newCampus);
-    } else {
-        res.status(400).send("Bad Request");
+/*
+Get /api/campuses/:id gets campus with specific id
+*/
+campuses.get('/:id', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM campuses WHERE id = ${campus_id}`)
+        if(Object.keys(data[0]).length !==0) {  // Found campus
+            res.status(200).json(data[0]);
+        } 
+        if(Object.keys(data[0]).length===0) {   // Not found
+            res.status(200).send("Campus not found, try again!");
+        }
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 
-campuses.put('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = campusesArray.find( campus => campus.id === parseInt(index));
-    const updateCampus = req.query;
-    if(result) {
-        campusesArray[result] = updateCampus;
-        res.status(200).send(updateCampus);
-    } else {
-        res.status(404).send("Campus not found!");
+/*
+Get /api/campuses/:id/students gets all students from specified campus
+*/
+campuses.get('/:id/students', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM campuses LEFT JOIN students ON students.campusid = campuses.id WHERE campuses.id = ${campus_id}`);
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+/*
+POST /api/campuses Creates new campus
+*/
+campuses.post('/', async(req, res, next) => {
+    const name = req.body.name
+    const address = req.body.address
+    const description = req.body.description
+    const imgUrl = req.body.imgUrl
+    try {
+        if(!imgUrl) {   // No image
+            await db.query(`INSERT INTO campuses 
+                        VALUES (DEFAULT, '${name}', '${address}', '${description}')`)
+        } 
+        if(imgUrl) {    // Campus appended image link
+            await db.query(`INSERT INTO campuses 
+                            VALUES (DEFAULT, '${name}', '${address}', '${description}', '${imgUrl}')`)
+        }
+        console.log("Successfully added.")
+        res.status(204).send("Success");
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+/*
+PUT /api/campuses/:id updates campus
+*/
+campuses.put('/:id', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    const name = req.body.name
+    const address = req.body.address
+    const description = req.body.description
+    const imgUrl = req.body.imgUrl
+    try {
+        await db.query(`UPDATE students 
+                        SET name = '${name}', address = '${address}' ,description = '${description}', imgUrl = '${imgUrl}'
+                        WHERE id = ${student_id}`)
+        res.status(200).send("Successfully updated!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
 
-campuses.delete('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const deleteCampus = campusesArray.find( campus => campus.id == parseInt(index));
-    if(deleteCampus) {
-        campusesArray.splice(deleteCampus,1);
-        res.status(200).send("Student deleted!");
-    } else {
-        res.status(400).send("Bad Request");
+/*
+Delete /api/campuses/:id Deletes campus with specific id
+*/
+campuses.delete('/:id', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    try {
+        await db.query(`DELETE FROM campuses WHERE id = ${campus_id}`)
+        res.status(200).send("Successfully deleted!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
-
 
 module.exports = campuses;
