@@ -3,9 +3,10 @@ const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
 const db = require('../database/db')
-
+const cors = require('cors')
+students.use(cors())
 /*
-Get /api/students gets all students
+GET /api/students gets all students
 */
 students.get('/', async(req, res, next) => {
     try {
@@ -16,7 +17,7 @@ students.get('/', async(req, res, next) => {
     }
 })
 /*
-Get /api/students/:id gets student with specific id
+GET /api/students/:id gets student with specific id
 */
 students.get('/:id', async(req, res, next) => {
     const student_id = parseInt(req.params.id);
@@ -95,7 +96,7 @@ students.put('/:id', async(req, res, next) => {
 });
 
 /*
-Delete /api/students/:id Deletes student with specific id
+DELETE /api/students/:id Deletes student with specific id
 */
 students.delete('/:id', async(req, res, next) => {
     const student_id = parseInt(req.params.id);

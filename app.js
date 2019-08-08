@@ -1,11 +1,11 @@
 const express = require('express');
 const students = require('./routes/students');
 const campuses = require('./routes/campuses');
-
 const app = express();
 
-app.use('/api/students', students);
-app.use('/api/campuses', campuses);
+app.use(cors())
+app.use(`/students`, students);
+app.use(`/campuses`, campuses);
 
 
 var port = process.env.PORT || 3000;
