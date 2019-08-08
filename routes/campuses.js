@@ -6,6 +6,12 @@ const cors = require('cors')
 campuses.use(cors())
 campuses.use(bodyParser.json());
 
+// Find all students from school
+//SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id ORDER BY campuses.name ASC
+
+/*
+Get /api/campuses gets all campuses
+*/
 campuses.get('/', async(req, res, next) => {
     try {
         const data = await db.query("SELECT * FROM campuses");
@@ -15,6 +21,9 @@ campuses.get('/', async(req, res, next) => {
     }
 })
 
+/*
+Get /api/campuses/:id gets campus with specific id
+*/
 campuses.get('/:id', async(req, res, next) => {
     const campus_id = parseInt(req.params.id);
     try {
@@ -30,6 +39,22 @@ campuses.get('/:id', async(req, res, next) => {
     }
 })
 
+/*
+Get /api/campuses/:id/students gets all students from specified campus
+*/
+campuses.get('/:id/students', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM campuses LEFT JOIN students ON students.campusid = campuses.id WHERE campuses.id = ${campus_id}`);
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+/*
+POST /api/campuses Creates new campus
+*/
 campuses.post('/', async(req, res, next) => {
     const name = req.body.name
     const address = req.body.address
@@ -51,6 +76,9 @@ campuses.post('/', async(req, res, next) => {
     }
 })
 
+/*
+PUT /api/campuses/:id updates campus
+*/
 campuses.put('/:id', async(req, res, next) => {
     const campus_id = parseInt(req.params.id);
     const name = req.body.name
@@ -59,7 +87,7 @@ campuses.put('/:id', async(req, res, next) => {
     const imgUrl = req.body.imgUrl
     try {
         await db.query(`UPDATE students 
-                        SET name = '${name}', address = '${address}' ,description = '${description}'
+                        SET name = '${name}', address = '${address}' ,description = '${description}', imgUrl = '${imgUrl}'
                         WHERE id = ${student_id}`)
         res.status(200).send("Successfully updated!");
     } catch (err) {
@@ -67,6 +95,9 @@ campuses.put('/:id', async(req, res, next) => {
     }
 });
 
+/*
+Delete /api/campuses/:id Deletes campus with specific id
+*/
 campuses.delete('/:id', async(req, res, next) => {
     const campus_id = parseInt(req.params.id);
     try {
@@ -76,10 +107,5 @@ campuses.delete('/:id', async(req, res, next) => {
         res.status(400).send(err);
     }
 })
-
-// Find all students from school
-//SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id ORDER BY campuses.name ASC
-// Find all students in specified school
-// SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id WHERE campuses.id = 1
 
 module.exports = campuses;

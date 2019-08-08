@@ -34,6 +34,19 @@ students.get('/:id', async(req, res, next) => {
 })
 
 /*
+Get /api/students/:id/campus gets a specific student's campus information
+*/
+students.get('/:id/campus', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId =                                      campuses.id WHERE students.id = ${student_id}`);
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+/*
 POST /api/students Creates new student
 */
 students.post('/', async(req, res, next) => {
@@ -62,8 +75,6 @@ students.post('/', async(req, res, next) => {
 
 /*
 PUT /api/students/:id updates student
-------
-Temp fix -> deleting position and inserting new value
 */
 students.put('/:id', async(req, res, next) => {
     const student_id = parseInt(req.params.id);
@@ -75,7 +86,7 @@ students.put('/:id', async(req, res, next) => {
     const imgUrl = req.body.imgUrl
     try {
         await db.query(`UPDATE students 
-                        SET firstname = '${firstName}', lastname = '${lastName}' ,email = '${email}',gpa = ${gpa}, campusId = ${campusId}
+                        SET firstname = '${firstName}', lastname = '${lastName}' ,email = '${email}',gpa = ${gpa}, campusId = ${campusId}, imgUrl = '${imgUrl}'
                         WHERE id = ${student_id}`)
         res.status(200).send("Successfully updated!");
     } catch (err) {
@@ -95,9 +106,5 @@ students.delete('/:id', async(req, res, next) => {
         res.status(400).send(err);
     }
 })
-
-// Find specified student's college info
-// SELECT * FROM students INNER JOIN campuses ON students.campusid = campuses.id WHERE students.id = 1
-
 
 module.exports = students;
