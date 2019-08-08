@@ -1,9 +1,10 @@
 const express = require('express');
 const students = require('./routes/students');
 const campuses = require('./routes/campuses');
-
+const cors = require('cors')
 const app = express();
 
+app.use(cors())
 app.use('/api/students', students);
 app.use('/api/campuses', campuses);
 
