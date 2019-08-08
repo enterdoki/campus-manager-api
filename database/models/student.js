@@ -1,10 +1,11 @@
 const Sequelize = require('sequelize');
 const db = require('../db');
 
-const Studentes = db.define("students", {
+const Students = db.define("students", {
     id: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        primaryKey: true,
         autoIncrement: true
       },
     firstName : {

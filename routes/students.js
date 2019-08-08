@@ -2,28 +2,37 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
-
-
+const db = require('../database/db')
 
 
 /*
 Get /api/students gets all students
 */
-students.get('/', (req, res, next) => {
-    res.status(200).send("HI");
+students.get('/', async(req, res, next) => {
+    try {
+        const data = await db.query("SELECT * FROM students");
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
 })
-
 /*
 Get /api/students/:id gets student with specific id
 */
-students.get('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = studentsArray.find( student => student.id === parseInt(index));
-    if(result) {
-        res.status(200).send(result);
-    } else {
-        res.status(404).send("Student not found!");
+students.get('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM students WHERE id = ${student_id}`)
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(400).send(err);
     }
+    // const result = studentsArray.find( student => student.id === parseInt(index));
+    // if(result) {
+    //     res.status(200).send(result);
+    // } else {
+    //     res.status(404).send("Student not found!");
+    // }
 })
 
 /*
@@ -60,15 +69,22 @@ students.put('/:id', (req, res, next) => {
 /*
 Delete /api/students/:id Deletes student with specific id
 */
-students.delete('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const deleteStudent = studentsArray.find( student => student.id == parseInt(index));
-    if(deleteStudent) {
-        studentsArray.splice(deleteStudent,1);
-        res.status(200).send("Student deleted!");
-    } else {
-        res.status(400).send("Bad Request");
+students.delete('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    try {
+        await db.query(`DELETE FROM students WHERE id = ${student_id}`)
+        res.status(200).send("Successfully deleted!");
+    } catch (err) {
+        res.status(400).send(err);
     }
+    // const index = req.params.id;
+    // const deleteStudent = studentsArray.find( student => student.id == parseInt(index));
+    // if(deleteStudent) {
+    //     studentsArray.splice(deleteStudent,1);
+    //     res.status(200).send("Student deleted!");
+    // } else {
+    //     res.status(400).send("Bad Request");
+    // }
 })
 
 
