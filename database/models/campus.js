@@ -25,4 +25,6 @@ const Campuses = db.define("campuses", {
     }
 });
 
+
+
 module.exports = Campuses;

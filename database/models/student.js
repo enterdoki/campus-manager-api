@@ -8,11 +8,11 @@ const Students = db.define("students", {
         primaryKey: true,
         autoIncrement: true
       },
-    firstName : {
+    firstname : {
         type: Sequelize.STRING,
         allowNull: false
     },
-    lastName : {
+    lastname : {
         type: Sequelize.STRING,
         allowNull: false
     },
@@ -25,6 +25,7 @@ const Students = db.define("students", {
     },
     gpa: {
         type: Sequelize.INTEGER,
+        allowNull: false
     },
     campusId: {
         type: Sequelize.INTEGER,
@@ -34,7 +35,8 @@ const Students = db.define("students", {
             key: "id"
         }
     }
-
 });
+
+
 
 module.exports = Students;

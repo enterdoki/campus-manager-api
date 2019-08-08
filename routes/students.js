@@ -9,8 +9,8 @@ Get /api/students gets all students
 */
 students.get('/', async(req, res, next) => {
     try {
-        const data = await db.query("SELECT * FROM students");
-        res.status(200).json(data);
+        const data = await db.query("SELECT * FROM students" );
+        res.status(200).json(data[0]);
     } catch (err) {
         res.status(400).send(err);
     }
@@ -22,8 +22,12 @@ students.get('/:id', async(req, res, next) => {
     const student_id = parseInt(req.params.id);
     try {
         const data = await db.query(`SELECT * FROM students WHERE id = ${student_id}`)
-        res.status(200).json(data);
-        
+        if(Object.keys(data[0]).length !==0) {  // Found student
+            res.status(200).json(data[0]);
+        } 
+        if(Object.keys(data[0]).length===0) {   // Not found
+            res.status(200).send("Student not found, try again!");
+        }
     } catch (err) {
         res.status(400).send(err);
     }
@@ -61,16 +65,21 @@ PUT /api/students/:id updates student
 ------
 Temp fix -> deleting position and inserting new value
 */
-students.put('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const result = studentsArray.find( student => student.id === parseInt(index));
-    const updateStudent = req.body;
-    if(result) {
-       // studentsArray[result] = updateStudent;
-        studentsArray.splice(result,1,updateStudent);
-        res.status(200).send(studentsArray);
-    } else {
-        res.status(400).send("Student not found!");
+students.put('/:id', async(req, res, next) => {
+    const student_id = parseInt(req.params.id);
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+    const gpa = req.body.gpa
+    const campusId = req.body.campusId
+    const imgUrl = req.body.imgUrl
+    try {
+        await db.query(`UPDATE students 
+                        SET firstname = '${firstName}', lastname = '${lastName}' ,email = '${email}',gpa = ${gpa}, campusId = ${campusId}
+                        WHERE id = ${student_id}`)
+        res.status(200).send("Successfully updated!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
 
@@ -86,6 +95,7 @@ students.delete('/:id', async(req, res, next) => {
         res.status(400).send(err);
     }
 })
+
 
 
 module.exports = students;
