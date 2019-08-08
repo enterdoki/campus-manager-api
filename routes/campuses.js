@@ -85,7 +85,7 @@ campuses.put('/:id', async(req, res, next) => {
     const imgUrl = req.body.imgUrl
     try {
         await db.query(`UPDATE campuses 
-                        SET name = '${name}', address = '${address}' ,description = '${description}', imgUrl = '${imgUrl}'
+                        SET name = '${name}', address = '${address}' ,description = '${description}', image = '${imgUrl}'
                         WHERE id = ${campus_id}`)
         res.status(200).send("Successfully updated!");
     } catch (err) {
