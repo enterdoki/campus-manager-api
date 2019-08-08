@@ -1,7 +1,6 @@
 const express = require('express');
 const students = require('./routes/students');
 const campuses = require('./routes/campuses');
-const cors = require('cors')
 const app = express();
 const cors = require('cors')
 app.use(cors())
