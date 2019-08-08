@@ -22,21 +22,26 @@ campuses.get('/:id', async(req, res, next) => {
     } catch (err) {
         res.status(400).send(err);
     }
-    // const result = campusesArray.find( campus => campus.id === parseInt(index));
-    // if(result) {
-    //     res.status(200).send(result);
-    // } else {
-    //     res.status(404).send('Not found');
-    // }
 })
 
-campuses.post('/', (req, res, next) => {
-    const newCampus = req.query;
-    if(newCampus) {
-        campusesArray.push(newCampus);
-        res.status(200).send(newCampus);
-    } else {
-        res.status(400).send("Bad Request");
+campuses.post('/', async(req, res, next) => {
+    const name = req.body.name
+    const address = req.body.address
+    const description = req.body.description
+    const imgUrl = req.body.imgUrl
+    try {
+        if(!imgUrl) {   // No image
+            await db.query(`INSERT INTO campuses 
+                        VALUES (DEFAULT, '${name}', '${address}', '${description}')`)
+        } 
+        if(imgUrl) {    // Campus appended image link
+            await db.query(`INSERT INTO campuses 
+                            VALUES (DEFAULT, '${name}', '${address}', '${description}', '${imgUrl}')`)
+        }
+        console.log("Successfully added.")
+        res.status(204).send("Success");
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 
@@ -52,14 +57,13 @@ campuses.put('/:id', (req, res, next) => {
     }
 });
 
-campuses.delete('/:id', (req, res, next) => {
-    const index = req.params.id;
-    const deleteCampus = campusesArray.find( campus => campus.id == parseInt(index));
-    if(deleteCampus) {
-        campusesArray.splice(deleteCampus,1);
-        res.status(200).send("Student deleted!");
-    } else {
-        res.status(400).send("Bad Request");
+campuses.delete('/:id', async(req, res, next) => {
+    const campus_id = parseInt(req.params.id);
+    try {
+        await db.query(`DELETE FROM campuses WHERE id = ${campus_id}`)
+        res.status(200).send("Successfully deleted!");
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 

@@ -4,7 +4,6 @@ const students = express.Router();
 students.use(bodyParser.json());
 const db = require('../database/db')
 
-
 /*
 Get /api/students gets all students
 */
@@ -24,29 +23,38 @@ students.get('/:id', async(req, res, next) => {
     try {
         const data = await db.query(`SELECT * FROM students WHERE id = ${student_id}`)
         res.status(200).json(data);
+        
     } catch (err) {
         res.status(400).send(err);
     }
-    // const result = studentsArray.find( student => student.id === parseInt(index));
-    // if(result) {
-    //     res.status(200).send(result);
-    // } else {
-    //     res.status(404).send("Student not found!");
-    // }
 })
 
 /*
 POST /api/students Creates new student
 */
-students.post('/', (req, res, next) => {
-    const newStudent = req.body;
-    if(newStudent) {
-        studentsArray.push(newStudent);
-        res.status(200).send(studentsArray);
-    } else {
-        res.status(400).send("Bad Request");
+students.post('/', async(req, res, next) => {
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+    const gpa = req.body.gpa
+    const campusId = req.body.campusId
+    const imgUrl = req.body.imgUrl
+    
+    try {
+        if(!imgUrl) {   // No image
+            await db.query(`INSERT INTO students 
+                        VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId})`)
+        } 
+        if(imgUrl) {    // User appended image link
+            await db.query(`INSERT INTO students 
+                            VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId}, '${imgUrl}')`)
+        }
+        console.log("Successfully added.")
+        res.status(204).send("Success");
+    } catch (err) {
+        res.status(400).send(err);
     }
-})
+});
 
 /*
 PUT /api/students/:id updates student
@@ -77,14 +85,6 @@ students.delete('/:id', async(req, res, next) => {
     } catch (err) {
         res.status(400).send(err);
     }
-    // const index = req.params.id;
-    // const deleteStudent = studentsArray.find( student => student.id == parseInt(index));
-    // if(deleteStudent) {
-    //     studentsArray.splice(deleteStudent,1);
-    //     res.status(200).send("Student deleted!");
-    // } else {
-    //     res.status(400).send("Bad Request");
-    // }
 })
 
 

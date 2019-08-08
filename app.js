@@ -9,10 +9,9 @@ app.use('/api/campuses', campuses);
 var port = process.env.PORT || 3000;
 
 app.get('/', (req, res, next) => {
-    console.log('got request for hello world');
-    res.status(200).send('Hello World, default route!');
+    res.status(200).send('Hi, this is the default API route!');
 })
 
 app.listen(port, () => {
-    console.log('Example app is listening on http://localhost:' + port);
+    console.log('Server is listening on http://localhost:' + port);
 });
