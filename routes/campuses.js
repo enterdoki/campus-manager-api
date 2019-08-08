@@ -2,8 +2,6 @@ const express = require('express');
 const campuses = express.Router();
 const bodyParser = require('body-parser')
 const db = require('../database/db')
-const cors = require('cors')
-campuses.use(cors())
 campuses.use(bodyParser.json());
 
 // Find all students from school
@@ -86,9 +84,9 @@ campuses.put('/:id', async(req, res, next) => {
     const description = req.body.description
     const imgUrl = req.body.imgUrl
     try {
-        await db.query(`UPDATE students 
+        await db.query(`UPDATE campuses 
                         SET name = '${name}', address = '${address}' ,description = '${description}', imgUrl = '${imgUrl}'
-                        WHERE id = ${student_id}`)
+                        WHERE id = ${campus_id}`)
         res.status(200).send("Successfully updated!");
     } catch (err) {
         res.status(400).send(err);
