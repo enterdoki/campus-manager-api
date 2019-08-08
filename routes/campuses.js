@@ -77,5 +77,9 @@ campuses.delete('/:id', async(req, res, next) => {
     }
 })
 
+// Find all students from school
+//SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id ORDER BY campuses.name ASC
+// Find all students in specified school
+// SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id WHERE campuses.id = 1
 
 module.exports = campuses;

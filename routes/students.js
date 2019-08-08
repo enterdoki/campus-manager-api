@@ -96,6 +96,8 @@ students.delete('/:id', async(req, res, next) => {
     }
 })
 
+// Find specified student's college info
+// SELECT * FROM students INNER JOIN campuses ON students.campusid = campuses.id WHERE students.id = 1
 
 
 module.exports = students;
