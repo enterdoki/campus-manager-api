@@ -1,7 +1,6 @@
-const express = require('express');
-const campuses = express.Router();
+const campuses = require('express').Router();
+const { Campus, Student } = require("../database/models");
 const bodyParser = require('body-parser')
-const db = require('../database/db')
 campuses.use(bodyParser.json());
 
 // Find all students from school
@@ -12,10 +11,12 @@ Get /api/campuses gets all campuses
 */
 campuses.get('/', async(req, res, next) => {
     try {
-        const data = await db.query("SELECT * FROM campuses");
-        res.status(200).json(data[0]);
+        const campuses = await Campus.findAll();
+        if(campus) {
+            res.status(200).json(campuses);
+        }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 
@@ -23,17 +24,15 @@ campuses.get('/', async(req, res, next) => {
 Get /api/campuses/:id gets campus with specific id
 */
 campuses.get('/:id', async(req, res, next) => {
-    const campus_id = parseInt(req.params.id);
     try {
-        const data = await db.query(`SELECT * FROM campuses WHERE id = ${campus_id}`)
-        if(Object.keys(data[0]).length !==0) {  // Found campus
-            res.status(200).json(data[0]);
-        } 
-        if(Object.keys(data[0]).length===0) {   // Not found
-            res.status(200).send("Campus not found, try again!");
+        const campus = await Campus.findOne({
+            where: {id : req.params.id}
+        });
+        if(campus) {
+            res.status(200).json(campus);
         }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 
@@ -41,36 +40,30 @@ campuses.get('/:id', async(req, res, next) => {
 Get /api/campuses/:id/students gets all students from specified campus
 */
 campuses.get('/:id/students', async(req, res, next) => {
-    const campus_id = parseInt(req.params.id);
-    try {
-        const data = await db.query(`SELECT * FROM campuses LEFT JOIN students ON students.campusid = campuses.id WHERE campuses.id = ${campus_id}`);
-        res.status(200).json(data[0]);
-    } catch (err) {
-        res.status(400).send(err);
-    }
+    Campus.findAll({ 
+        where:{id:req.params.id},
+        include:[
+            {model:Student, as: campuses_id,
+            where: {
+                is_valid:1,
+                is_verify:1},
+                required:false
+            }
+        ]
+    })
+    .then(campuses => res.status(200).json(campuses))
+    .catch(err => next(err));
 })
 
 /*
 POST /api/campuses Creates new campus
 */
 campuses.post('/', async(req, res, next) => {
-    const name = req.body.name
-    const address = req.body.address
-    const description = req.body.description
-    const imgUrl = req.body.imgUrl
     try {
-        if(!imgUrl) {   // No image
-            await db.query(`INSERT INTO campuses 
-                        VALUES (DEFAULT, '${name}', '${address}', '${description}')`)
-        } 
-        if(imgUrl) {    // Campus appended image link
-            await db.query(`INSERT INTO campuses 
-                            VALUES (DEFAULT, '${name}', '${address}', '${description}', '${imgUrl}')`)
-        }
-        console.log("Successfully added.")
-        res.status(204).send("Success");
+       let new_campus = await Campus.create(req.body);
+       res.status(201).json(new_campus);    
     } catch (err) {
-        res.status(400).send(err);
+        next(err)
     }
 })
 
@@ -78,18 +71,15 @@ campuses.post('/', async(req, res, next) => {
 PUT /api/campuses/:id updates campus
 */
 campuses.put('/:id', async(req, res, next) => {
-    const campus_id = parseInt(req.params.id);
-    const name = req.body.name
-    const address = req.body.address
-    const description = req.body.description
-    const imgUrl = req.body.imgUrl
     try {
-        await db.query(`UPDATE campuses 
-                        SET name = '${name}', address = '${address}' ,description = '${description}', image = '${imgUrl}'
-                        WHERE id = ${campus_id}`)
+        await Campus.update(req.body, {
+            where: {id:req.params.id},
+            returning: true,
+            plain: true,
+        })
         res.status(200).send("Successfully updated!");
     } catch (err) {
-        res.status(400).send(err);
+        next(errr);
     }
 });
 
@@ -97,12 +87,15 @@ campuses.put('/:id', async(req, res, next) => {
 Delete /api/campuses/:id Deletes campus with specific id
 */
 campuses.delete('/:id', async(req, res, next) => {
-    const campus_id = parseInt(req.params.id);
     try {
-        await db.query(`DELETE FROM campuses WHERE id = ${campus_id}`)
-        res.status(200).send("Successfully deleted!");
+        const deleteOne = await Campus.destroy({
+            where: {id : req.params.id}
+        });
+        if(deleteOne) {
+            res.status(200).send("Successfully deleted!");
+        }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 
