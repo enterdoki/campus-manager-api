@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
 const { Campus, Student } = require("../database/models");
+const db = require('../database/db')
 
 /*
 GET /api/students gets all students
@@ -48,6 +49,15 @@ students.get('/:id/campus', async(req, res, next) => {
     } catch (err) {
         res.status(400).send(err);
     }
+    // const campus_student = await Student.findOne({
+    //     where: {id : req.params.id}
+    // })
+    // try {
+    //     const students_of_campus = await campus_student.getCampuses();
+    //     res.status(200).json(students_of_campus);
+    // } catch(err) {
+    //     next(err);
+    // }
 })
 
 /*

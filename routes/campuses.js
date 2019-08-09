@@ -2,6 +2,7 @@ const campuses = require('express').Router();
 const { Campus, Student } = require("../database/models");
 const bodyParser = require('body-parser')
 campuses.use(bodyParser.json());
+const db = require('../database/db')
 
 // Find all students from school
 //SELECT * FROM campuses INNER JOIN students ON students.campusid = campuses.id ORDER BY campuses.name ASC
@@ -39,7 +40,7 @@ campuses.get('/:id', async(req, res, next) => {
 /*
 Get /api/campuses/:id/students gets all students from specified campus
 */
-campuses.get('/:id/students', async(req, res, next) => {
+campuses.get('/:id/students', async (req, res, next) => {
     const campus_id = parseInt(req.params.id);
     try {
         const data = await db.query(`SELECT * FROM campuses LEFT JOIN students ON students.campusid = campuses.id WHERE campuses.id = ${campus_id}`);
@@ -47,6 +48,15 @@ campuses.get('/:id/students', async(req, res, next) => {
     } catch (err) {
         res.status(400).send(err);
     }
+    // const campus_student = await Campus.findOne({
+    //     where: {id : req.params.id}
+    // })
+    // try {
+    //     const students_of_campus = await campus_student.getStudents();
+    //     res.status(200).json(students_of_campus);
+    // } catch(err) {
+    //     next(err);
+    // }
 })
 
 /*
