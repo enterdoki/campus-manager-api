@@ -2,34 +2,38 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
-const db = require('../database/db')
+const { Campus, Student } = require("../database/models");
 
 /*
 GET /api/students gets all students
 */
 students.get('/', async(req, res, next) => {
     try {
-        const data = await db.query("SELECT * FROM students" );
-        res.status(200).json(data[0]);
+        const students = await Student.findAll();
+        if(students) {
+            res.status(200).json(students);
+        } else {
+            res.status(400).send("Not found");
+        }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 /*
 GET /api/students/:id gets student with specific id
 */
 students.get('/:id', async(req, res, next) => {
-    const student_id = parseInt(req.params.id);
     try {
-        const data = await db.query(`SELECT * FROM students WHERE id = ${student_id}`)
-        if(Object.keys(data[0]).length !==0) {  // Found student
-            res.status(200).json(data[0]);
-        } 
-        if(Object.keys(data[0]).length===0) {   // Not found
-            res.status(200).send("Student not found, try again!");
+        const student = await Student.findOne({
+            where: {id : req.params.id}
+        });
+        if(student) {
+            res.status(200).json(campus);
+        } else {
+            res.status(400).send("Not found");
         }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 
@@ -50,47 +54,27 @@ students.get('/:id/campus', async(req, res, next) => {
 POST /api/students Creates new student
 */
 students.post('/', async(req, res, next) => {
-    const firstName = req.body.firstName
-    const lastName = req.body.lastName
-    const email = req.body.email
-    const gpa = req.body.gpa
-    const campusId = req.body.campusId
-    const imgUrl = req.body.imgUrl
-    
     try {
-        if(!imgUrl) {   // No image
-            await db.query(`INSERT INTO students 
-                        VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId})`)
-        } 
-        if(imgUrl) {    // User appended image link
-            await db.query(`INSERT INTO students 
-                            VALUES (DEFAULT, '${firstName}', '${lastName}', '${email}', ${gpa}, ${campusId}, '${imgUrl}')`)
-        }
-        console.log("Successfully added.")
-        res.status(204).send("Success");
-    } catch (err) {
-        res.status(400).send(err);
-    }
+        let new_student = await Student.create(req.body);
+        res.status(201).json(new_student);    
+     } catch (err) {
+         next(errr)
+     }
 });
 
 /*
 PUT /api/students/:id updates student
 */
 students.put('/:id', async(req, res, next) => {
-    const student_id = parseInt(req.params.id);
-    const firstName = req.body.firstName
-    const lastName = req.body.lastName
-    const email = req.body.email
-    const gpa = req.body.gpa
-    const campusId = req.body.campusId
-    const imgUrl = req.body.imgUrl
     try {
-        await db.query(`UPDATE students 
-                        SET firstname = '${firstName}', lastname = '${lastName}' ,email = '${email}',gpa = ${gpa}, campusId = ${campusId}, image = '${imgUrl}'
-                        WHERE id = ${student_id}`)
+        await Student.update(req.body, {
+            where: {id:req.params.id},
+            returning: true,
+            plain: true,
+        })
         res.status(200).send("Successfully updated!");
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 });
 
@@ -98,12 +82,15 @@ students.put('/:id', async(req, res, next) => {
 DELETE /api/students/:id Deletes student with specific id
 */
 students.delete('/:id', async(req, res, next) => {
-    const student_id = parseInt(req.params.id);
     try {
-        await db.query(`DELETE FROM students WHERE id = ${student_id}`)
-        res.status(200).send("Successfully deleted!");
+        const deleteOne = await Student.destroy({
+            where: {id : req.params.id}
+        });
+        if(deleteOne) {
+            res.status(200).send("Successfully deleted!");
+        }
     } catch (err) {
-        res.status(400).send(err);
+        next(err);
     }
 })
 
