@@ -29,7 +29,7 @@ students.get('/:id', async(req, res, next) => {
             where: {id : req.params.id}
         });
         if(student) {
-            res.status(200).json(campus);
+            res.status(200).json(student);
         } else {
             res.status(400).send("Not found");
         }
