@@ -3,6 +3,7 @@ const students = require('./routes/students');
 const campuses = require('./routes/campuses');
 const app = express();
 const cors = require('cors')
+const db = require('./database')
 app.use(cors())
 app.use(`/students`, students);
 app.use(`/campuses`, campuses);
