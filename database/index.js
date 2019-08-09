@@ -1,5 +1,5 @@
 const db = require('./db');
 
-require('../database/models');
+require('./models');
 
 module.exports = db;

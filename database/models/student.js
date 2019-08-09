@@ -35,6 +35,8 @@ const Students = db.define("students", {
             key: "id"
         }
     }
+},{
+    timestamps:false
 });
 
 
