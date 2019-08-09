@@ -8,8 +8,9 @@ const { Campus, Student } = require("../database/models");
 GET /api/students gets all students
 */
 students.get('/', async(req, res, next) => {
+    //{attributes:["id", "firstname", "lastname", "email", "image", "gpa", "campusid"]}
     try {
-        const students = await Student.findAll();
+        const students = await Student.findAll({attributes:{exclude:["campusId"]}});
         if(students) {
             res.status(200).json(students);
         } else {
@@ -25,7 +26,9 @@ GET /api/students/:id gets student with specific id
 students.get('/:id', async(req, res, next) => {
     try {
         const student = await Student.findOne({
-            where: {id : req.params.id}
+            where: {id : req.params.id},
+            attributes:{exclude:["campusId"]}
+            
         });
         if(student) {
             res.status(200).json(student);
@@ -43,7 +46,7 @@ Get /api/students/:id/campus gets a specific student's campus information
 students.get('/:id/campus', async(req, res, next) => {
     const student_id = parseInt(req.params.id);
     try {
-        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId =                                      campuses.id WHERE students.id = ${student_id}`);
+        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId = campuses.id WHERE students.id = ${student_id}`);
         res.status(200).json(data[0]);
     } catch (err) {
         res.status(400).send(err);
@@ -58,7 +61,7 @@ students.post('/', async(req, res, next) => {
         let new_student = await Student.create(req.body);
         res.status(201).json(new_student);    
      } catch (err) {
-         next(errr)
+         next(err)
      }
 });
 
