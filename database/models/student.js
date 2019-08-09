@@ -20,18 +20,18 @@ const Students = db.define("students", {
         type: Sequelize.STRING,
         allowNull: false
     },
-    imageUrl: {
+    image: {
         type: Sequelize.STRING,
     },
     gpa: {
         type: Sequelize.INTEGER,
         allowNull: false
     },
-    campusId: {
+    campusid: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-            model: "campuses",
+            model: "Campuses",
             key: "id"
         }
     }

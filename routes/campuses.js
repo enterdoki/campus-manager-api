@@ -13,7 +13,7 @@ Get /api/campuses gets all campuses
 campuses.get('/', async(req, res, next) => {
     try{
         const campus = await Campus.findAll()
-        res.status(200).send(campus);
+        res.status(200).json(campus);
     }
     catch(err){
         console.log(err);
@@ -26,7 +26,7 @@ Get /api/campuses/:id gets campus with specific id
 campuses.get('/:id', async(req, res, next) => {
     try{
         const campus = await Campus.findAll({where:{id: parseInt(req.params.id)}})
-        res.status(200).send(campus);
+        res.status(200).json(campus);
     }
     catch(err){
         console.log(err);
@@ -37,13 +37,32 @@ campuses.get('/:id', async(req, res, next) => {
 Get /api/campuses/:id/students gets all students from specified campus
 */
 campuses.get('/:id/students', async(req, res, next) => {
-    try{
-        const campus = await Campus.findAll({ include: [Student] })
-        res.status(200).send(campus);
-    }
-    catch(err){
-        console.log(err);
-    }
+    Campus.findAll({
+        include:[{
+            model: Student,
+            attributes:{exclude:["campusId"]},
+        }]
+    })
+    .then(campuses => res.status(200).json(campuses))
+    .catch(err => next(err));
+    // try{
+    //     const campus = await Campus.findAll({ include: [Student] })
+    //     console.log(campus)
+    //     res.status(200).send(campus);
+    // }
+    // catch(err){
+    //     console.log(err);
+    // }
+    // const campus_id = parseInt(req.params.id);
+    // try {
+    //     const ids = await db.query(`SELECT campusid FROM Student`);
+    //     console.log(ids)
+    //     const data = await db.query( `SELECT * Campus  FROM Campus LEFT JOIN Student ON ${campus_id} = Student.campusid`);
+    //     console.log(data)
+    //     res.status(200).json(data[0]);
+    // } catch (err) {
+    //     res.status(400).send(err);
+    // }
 })
 
 /*
@@ -64,12 +83,15 @@ campuses.post('/', async(req, res, next) => {
 PUT /api/campuses/:id updates campus
 */
 campuses.put('/:id', async(req, res, next) => {
-    try{
-        const campus = await Campus.update(req.body,{where: {id: parseInt(req.params.id)}})
-        console.log(campus);
-        res.status(200).send(campus);
-    }catch(err){
-        console.log(err);
+    try {
+        let campus = await Campus.update(req.body, {
+            where: {id:req.params.id},
+            returning: true,
+            plain: true,
+        })
+        res.status(200).json(campus[1]);
+    } catch (err) {
+        next(err);
     }
 });
 
