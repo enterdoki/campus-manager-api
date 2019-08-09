@@ -40,19 +40,18 @@ campuses.get('/:id', async(req, res, next) => {
 Get /api/campuses/:id/students gets all students from specified campus
 */
 campuses.get('/:id/students', async(req, res, next) => {
-    Campus.findAll({ 
-        where:{id:req.params.id},
-        include:[
-            {model:Student, as: campuses_id,
-            where: {
-                is_valid:1,
-                is_verify:1},
-                required:false
-            }
-        ]
-    })
-    .then(campuses => res.status(200).json(campuses))
-    .catch(err => next(err));
+    const campus_id = parseInt(req.params.id);
+    try {
+        const data = await db.query(`SELECT * FROM campuses WHERE id = ${campus_id}`)
+        if(Object.keys(data[0]).length !==0) {  // Found campus
+            res.status(200).json(data[0]);
+        } 
+        if(Object.keys(data[0]).length===0) {   // Not found
+            res.status(200).send("Campus not found, try again!");
+        }
+    } catch (err) {
+        res.status(400).send(err);
+    }
 })
 
 /*
