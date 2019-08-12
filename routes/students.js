@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const students = express.Router();
 students.use(bodyParser.json());
 const { Campus, Student } = require("../database/models");
+const db = require('../database/db')
 
 /*
 GET /api/students gets all students
@@ -44,13 +45,23 @@ students.get('/:id', async(req, res, next) => {
 Get /api/students/:id/campus gets a specific student's campus information
 */
 students.get('/:id/campus', async(req, res, next) => {
-    const student_id = parseInt(req.params.id);
     try {
-        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId = campuses.id WHERE students.id = ${student_id}`);
-        res.status(200).json(data[0]);
-    } catch (err) {
-        res.status(400).send(err);
+        let campus = await Student.findOne({
+            where: { id: req.params.id }, include: [{ model: Campus }]
+        })
+        res.status(200).json(campus)
+    } catch (error) {
+        console.log(error)
     }
+    // const campus_student = await Student.findOne({
+    //     where: {id : req.params.id}
+    // })
+    // try {
+    //     const students_of_campus = await campus_student.getCampuses();
+    //     res.status(200).json(students_of_campus);
+    // } catch(err) {
+    //     next(err);
+    // }
 })
 
 /*

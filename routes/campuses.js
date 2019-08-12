@@ -2,6 +2,7 @@ const campuses = require('express').Router();
 const { Campus, Student } = require("../database/models");
 const bodyParser = require('body-parser')
 campuses.use(bodyParser.json());
+const db = require('../database/db')
 
 
 // Find all students from school
@@ -45,6 +46,7 @@ campuses.get('/:id/students', async (req, res, next) => {
     } catch (error) {
         console.log(error)
     }
+   
 })
 
 /*
