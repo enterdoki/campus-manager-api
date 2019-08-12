@@ -45,12 +45,13 @@ students.get('/:id', async(req, res, next) => {
 Get /api/students/:id/campus gets a specific student's campus information
 */
 students.get('/:id/campus', async(req, res, next) => {
-    const student_id = parseInt(req.params.id);
     try {
-        const data = await db.query(`SELECT * FROM students LEFT JOIN campuses ON students.campusId = campuses.id WHERE students.id = ${student_id}`);
-        res.status(200).json(data[0]);
-    } catch (err) {
-        res.status(400).send(err);
+        let campus = await Student.findOne({
+            where: { id: req.params.id }, include: [{ model: Campus }]
+        })
+        res.status(200).json(campus)
+    } catch (error) {
+        console.log(error)
     }
     // const campus_student = await Student.findOne({
     //     where: {id : req.params.id}

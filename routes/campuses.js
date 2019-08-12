@@ -38,10 +38,6 @@ campuses.get('/:id', async (req, res, next) => {
 Get /api/campuses/:id/students gets all students from specified campus
 */
 campuses.get('/:id/students', async (req, res, next) => {
-<<<<<<< HEAD
-    const campus_id = parseInt(req.params.id);
-=======
->>>>>>> d4c7cb71a9cc984b7cd729e99838dcdbc42b6fbc
     try {
         let campuses = await Campus.findOne({
             where: { id: req.params.id }, include: [{ model: Student }]
@@ -50,15 +46,7 @@ campuses.get('/:id/students', async (req, res, next) => {
     } catch (error) {
         console.log(error)
     }
-    // const campus_student = await Campus.findOne({
-    //     where: {id : req.params.id}
-    // })
-    // try {
-    //     const students_of_campus = await campus_student.getStudents();
-    //     res.status(200).json(students_of_campus);
-    // } catch(err) {
-    //     next(err);
-    // }
+   
 })
 
 /*
