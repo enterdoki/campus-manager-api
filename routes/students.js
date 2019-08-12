@@ -9,8 +9,9 @@ const db = require('../database/db')
 GET /api/students gets all students
 */
 students.get('/', async(req, res, next) => {
+    //{attributes:["id", "firstname", "lastname", "email", "image", "gpa", "campusid"]}
     try {
-        const students = await Student.findAll();
+        const students = await Student.findAll({attributes:{exclude:["campusId"]}});
         if(students) {
             res.status(200).json(students);
         } else {
@@ -26,7 +27,9 @@ GET /api/students/:id gets student with specific id
 students.get('/:id', async(req, res, next) => {
     try {
         const student = await Student.findOne({
-            where: {id : req.params.id}
+            where: {id : req.params.id},
+            attributes:{exclude:["campusId"]}
+            
         });
         if(student) {
             res.status(200).json(student);
@@ -68,7 +71,7 @@ students.post('/', async(req, res, next) => {
         let new_student = await Student.create(req.body);
         res.status(201).json(new_student);    
      } catch (err) {
-         next(errr)
+         next(err)
      }
 });
 
